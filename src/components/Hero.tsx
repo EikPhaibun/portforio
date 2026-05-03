@@ -79,14 +79,14 @@ const Hero = () => {
                                                 onClick={() => handleEmailChoice(true)}
                                                 className="w-full px-4 py-3 text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-2"
                                             >
-                                                <Mail size={16} />
+                                                <Mail key="gmail-icon" size={16} />
                                                 <span>Open with Gmail</span>
                                             </button>
                                             <button
                                                 onClick={() => handleEmailChoice(false)}
                                                 className="w-full px-4 py-3 text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-2 border-t border-slate-700"
                                             >
-                                                <Mail size={16} />
+                                                <Mail key="client-icon" size={16} />
                                                 <span>Open with Email Client</span>
                                             </button>
                                         </motion.div>

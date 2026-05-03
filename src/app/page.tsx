@@ -6,6 +6,7 @@ import Hero from '@/components/Hero';
 import ProjectCard from '@/components/ProjectCard';
 import ResumeSection from '@/components/ResumeSection';
 import ContactCTA from '@/components/ContactCTA';
+import VisitorCounter from '@/components/VisitorCounter';
 import FloatingIcons from '@/components/FloatingIcons';
 import { portfolioData } from '@/data/portfolio-data';
 import { motion } from 'framer-motion';
@@ -35,12 +36,11 @@ export default function Home() {
           <div className="flex items-center gap-4 mb-8">
             <div className="h-1 w-12 bg-blue-500 rounded-full"></div>
             <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Professional Experience <span className="text-blue-500">@ MV Solution</span>
+              Professional <span className="text-blue-500">Portfolio</span>
             </h2>
           </div>
           <p className="text-slate-400 max-w-2xl text-lg mb-12">
-            Key enterprise projects delivered for MV Solution Co., Ltd, focusing on ERP customization,
-            complex workflow automation, and system integration.
+            Showcasing high-impact enterprise solutions and professional systems developed for industry leaders.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -77,6 +77,7 @@ export default function Home() {
       </section>
 
       <ContactCTA />
+      <VisitorCounter />
 
       <footer className="bg-slate-950 text-slate-500 py-12 border-t border-slate-900 relative z-10">
         <div className="container mx-auto px-6 text-center">
