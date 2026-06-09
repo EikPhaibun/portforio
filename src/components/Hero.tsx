@@ -1,124 +1,258 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Linkedin, Mail, ChevronDown } from 'lucide-react';
-import { profileData } from '@/data/portfolio-data';
-import AnimatedDev from './AnimatedDev';
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
+import { Mail, Linkedin, Github, ArrowDownRight, ChevronDown } from "lucide-react";
+import { profileData } from "@/data/portfolio-data";
+import CodeStream from "./CodeStream";
+
+const SPECS: { v: string; label: string; note: string }[] = [
+  { v: "5", label: "ERP platforms", note: "NetSuite · D365 · Odoo · ERPNext" },
+  { v: "7+", label: "Unified flows", note: "one approval platform" },
+  { v: "300+", label: "Active users", note: "daily factory + QA ops" },
+  { v: "4", label: "Stacks shipped", note: "web · mobile · ERP · data" },
+];
+
+const TITLE_BLOCK: { k: string; v: string }[] = [
+  { k: "Drawn by", v: 'Phaibun "Ikkyu" P.' },
+  { k: "Discipline", v: "Full-stack · ERP · Mobile" },
+  { k: "Location", v: "Bangkok, TH" },
+  { k: "Sheet", v: "01 / Profile" },
+  { k: "Rev", v: "2026.06" },
+];
 
 const Hero = () => {
-    const [showEmailOptions, setShowEmailOptions] = useState(false);
+  const reduce = useReducedMotion();
+  const [emailOpen, setEmailOpen] = useState(false);
+  const emailRef = useRef<HTMLDivElement>(null);
 
-    const handleEmailChoice = (useGmail: boolean) => {
-        if (useGmail) {
-            window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${profileData.contact.email}`, '_blank');
-        } else {
-            window.location.href = `mailto:${profileData.contact.email}`;
-        }
-        setShowEmailOptions(false);
+  useEffect(() => {
+    if (!emailOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (emailRef.current && !emailRef.current.contains(e.target as Node)) setEmailOpen(false);
     };
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setEmailOpen(false);
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [emailOpen]);
 
-    return (
-        <section className="relative min-h-screen flex items-center justify-center overflow-visible pt-20">
+  const handleEmail = (gmail: boolean) => {
+    const to = profileData.contact.email;
+    if (gmail) window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${to}`, "_blank");
+    else window.location.href = `mailto:${to}`;
+    setEmailOpen(false);
+  };
 
-            <div className="container mx-auto px-6 relative z-10 overflow-visible">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-12 overflow-visible">
+  const scrollTo = (id: string) => () =>
+    document.getElementById(id)?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
 
-                    {/* Text Content */}
+  const ease = [0.16, 1, 0.3, 1] as const;
+  const container: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: reduce ? 0 : 0.08, delayChildren: reduce ? 0 : 0.06 } },
+  };
+  const item: Variants = {
+    // Transform-only reveal: content stays visible even if the tween never runs.
+    // rAF (and thus Framer tweens) pauses on hidden/headless tabs, so fading from
+    // opacity:0 can ship the hero blank. Sliding keeps it visible as the default.
+    hidden: { y: reduce ? 0 : 18 },
+    show: { y: 0, transition: { duration: reduce ? 0 : 0.6, ease } },
+  };
+
+  return (
+    <section className="relative min-h-svh overflow-hidden bg-ground">
+      {/* blueprint grid ground */}
+      <div className="blueprint-grid blueprint-grid-fade pointer-events-none absolute inset-0" aria-hidden="true" />
+
+      {/* drawing frame + corner registration marks */}
+      <div className="pointer-events-none absolute inset-3 border border-rule-2/70 sm:inset-5" aria-hidden="true">
+        {[
+          "left-0 top-0 border-l-2 border-t-2",
+          "right-0 top-0 border-r-2 border-t-2",
+          "left-0 bottom-0 border-l-2 border-b-2",
+          "right-0 bottom-0 border-r-2 border-b-2",
+        ].map((c) => (
+          <span key={c} className={`absolute h-3 w-3 border-accent ${c}`} />
+        ))}
+      </div>
+
+      <div className="relative mx-auto flex min-h-svh max-w-6xl flex-col px-6 pb-6 pt-24 sm:px-10 sm:pt-28">
+        {/* top info strip */}
+        <motion.div
+          initial={reduce ? false : { y: -8 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.6, ease }}
+          className="tech-label flex items-center justify-between border-b border-rule pb-3"
+        >
+          <span>Portfolio / 2026</span>
+          <span className="hidden sm:inline">Enterprise Systems · Full-stack</span>
+          <span>Sheet 01 — Profile</span>
+        </motion.div>
+
+        {/* main */}
+        <div className="grid flex-1 items-center gap-x-10 gap-y-12 py-12 lg:grid-cols-[1.05fr_0.95fr]">
+          {/* left: title block content */}
+          <motion.div variants={container} initial="hidden" animate="show" className="max-w-xl">
+            <motion.div variants={item} className="mb-6 inline-flex items-center gap-2.5">
+              <span className="relative flex h-2 w-2">
+                {!reduce && (
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
+                )}
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
+              </span>
+              <span className="tech-label text-ink-2">Available for full-time</span>
+            </motion.div>
+
+            <motion.h1
+              variants={item}
+              className="text-pretty text-[clamp(2.5rem,7vw,4.5rem)] font-semibold leading-[1.02] tracking-[-0.03em] text-ink"
+            >
+              Phaibun
+              <br />
+              Poonmaroeng
+            </motion.h1>
+
+            <motion.div variants={item} className="mt-7 flex items-center gap-3">
+              <span className="h-px w-8 bg-accent" />
+              <p className="font-mono text-sm uppercase tracking-[0.1em] text-ink-3">
+                {profileData.role}
+              </p>
+            </motion.div>
+
+            <motion.p variants={item} className="mt-7 max-w-[52ch] text-lg leading-relaxed text-ink-2">
+              I work mostly on ERP. I customize NetSuite and Dynamics&nbsp;365, and build the React,
+              Flask, and Flutter apps around them. Most of it is running now in factories and finance teams.
+            </motion.p>
+
+            {/* CTAs */}
+            <motion.div variants={item} className="mt-9 flex flex-wrap items-center gap-3">
+              <div className="relative" ref={emailRef}>
+                <button
+                  onClick={() => setEmailOpen((v) => !v)}
+                  aria-haspopup="menu"
+                  aria-expanded={emailOpen}
+                  className="inline-flex items-center gap-2 rounded-sm bg-accent-ink px-5 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-accent-deep"
+                >
+                  <Mail size={17} strokeWidth={2.25} />
+                  Get in touch
+                  <ChevronDown
+                    size={15}
+                    className={`transition-transform duration-200 ${emailOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                <AnimatePresence>
+                  {emailOpen && (
                     <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="flex-1 text-center md:text-left overflow-visible"
+                      role="menu"
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.16, ease }}
+                      className="absolute left-0 top-full z-[var(--z-popover)] mt-2 min-w-[230px] overflow-hidden rounded-sm border border-rule-2 bg-paper shadow-[0_18px_40px_-20px_oklch(0.2_0.02_255/0.45)]"
                     >
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium mb-6"
-                        >
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                            </span>
-                            Available for new projects
-                        </motion.div>
-
-                        <h1 className="text-4xl md:text-6xl font-bold mb-6 tracking-tight leading-tight text-white">
-                            <span className="text-slate-400 font-medium block text-2xl md:text-3xl mb-2">Hi, I'm</span>
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-emerald-400 animate-gradient-x block">
-                                {profileData.name}
-                            </span>
-                        </h1>
-
-                        <p className="text-lg md:text-xl text-slate-400 mb-8 leading-relaxed max-w-2xl">
-                            {profileData.role}. <br />
-                            {profileData.about.split('. ')[0]}.
-                        </p>
-
-                        <div className="flex flex-wrap justify-center md:justify-start gap-4 overflow-visible">
-                            <div className="relative z-[100]">
-                                <button
-                                    onClick={() => setShowEmailOptions(!showEmailOptions)}
-                                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)]"
-                                >
-                                    <Mail size={20} />
-                                    Contact Me
-                                    <ChevronDown size={16} className={`transition-transform ${showEmailOptions ? 'rotate-180' : ''}`} />
-                                </button>
-
-                                <AnimatePresence>
-                                    {showEmailOptions && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: -10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -10 }}
-                                            className="absolute top-full mt-2 left-0 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-visible z-[110] min-w-[220px]"
-                                        >
-                                            <button
-                                                onClick={() => handleEmailChoice(true)}
-                                                className="w-full px-4 py-3 text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-2"
-                                            >
-                                                <Mail key="gmail-icon" size={16} />
-                                                <span>Open with Gmail</span>
-                                            </button>
-                                            <button
-                                                onClick={() => handleEmailChoice(false)}
-                                                className="w-full px-4 py-3 text-left text-white hover:bg-slate-700 transition-colors flex items-center gap-2 border-t border-slate-700"
-                                            >
-                                                <Mail key="client-icon" size={16} />
-                                                <span>Open with Email Client</span>
-                                            </button>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-
-                            <a href={`https://${profileData.contact.linkedin}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors border border-slate-700">
-                                <Linkedin size={20} />
-                                LinkedIn
-                            </a>
-                            <a href={`https://${profileData.contact.github}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-6 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-lg font-medium transition-colors border border-slate-700">
-                                <Github size={20} />
-                                GitHub
-                            </a>
-                        </div>
+                      <button
+                        role="menuitem"
+                        onClick={() => handleEmail(true)}
+                        className="flex w-full items-center gap-2.5 px-4 py-3 text-left text-sm text-ink transition-colors hover:bg-paper-2"
+                      >
+                        <Mail size={15} className="text-accent-ink" />
+                        Open in Gmail
+                      </button>
+                      <button
+                        role="menuitem"
+                        onClick={() => handleEmail(false)}
+                        className="flex w-full items-center gap-2.5 border-t border-rule px-4 py-3 text-left text-sm text-ink transition-colors hover:bg-paper-2"
+                      >
+                        <Mail size={15} className="text-ink-3" />
+                        Open in mail app
+                      </button>
                     </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-                    {/* Visual Element - Animated Dev */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
-                        className="flex-1 flex justify-center md:justify-end"
-                    >
-                        <AnimatedDev />
-                    </motion.div>
+              <a
+                href={`https://${profileData.contact.linkedin}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-sm border border-rule-2 bg-paper px-4 py-3 text-sm font-medium text-ink transition-colors duration-200 hover:border-ink-3 hover:bg-paper-2"
+              >
+                <Linkedin size={16} />
+                LinkedIn
+              </a>
+              <a
+                href={`https://${profileData.contact.github}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-sm border border-rule-2 bg-paper px-4 py-3 text-sm font-medium text-ink transition-colors duration-200 hover:border-ink-3 hover:bg-paper-2"
+              >
+                <Github size={16} />
+                GitHub
+              </a>
+            </motion.div>
+          </motion.div>
 
-                </div>
-            </div>
-        </section>
-    );
+          {/* right: live code panel */}
+          <div className="relative flex flex-col items-center lg:items-end">
+            <CodeStream />
+            <p className="tech-label mt-3 self-center lg:self-end">Fig. 01 — Approval engine · live</p>
+          </div>
+        </div>
+
+        {/* spec row */}
+        <motion.dl
+          variants={container}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-2 border-y border-rule sm:grid-cols-4"
+        >
+          {SPECS.map((s, i) => (
+            <motion.div
+              key={s.label}
+              variants={item}
+              className={`px-1 py-5 sm:px-5 ${i !== 0 ? "sm:border-l sm:border-rule" : ""} ${
+                i % 2 !== 0 ? "border-l border-rule sm:border-l" : ""
+              } ${i >= 2 ? "border-t border-rule sm:border-t-0" : ""}`}
+            >
+              <dt className="sr-only">{s.label}</dt>
+              <dd className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-semibold tracking-tight text-ink tabular-nums">{s.v}</span>
+                <span className="h-1.5 w-1.5 translate-y-[-2px] bg-accent" aria-hidden="true" />
+              </dd>
+              <p className="mt-1 text-sm font-medium text-ink">{s.label}</p>
+              <p className="font-mono text-xs text-ink-3">{s.note}</p>
+            </motion.div>
+          ))}
+        </motion.dl>
+
+        {/* title block + scroll cue */}
+        <div className="mt-auto flex flex-col gap-4 pt-6 sm:flex-row sm:items-end sm:justify-between">
+          <dl className="flex flex-wrap gap-x-8 gap-y-2">
+            {TITLE_BLOCK.map((f) => (
+              <div key={f.k} className="flex flex-col">
+                <dt className="tech-label text-[0.625rem]">{f.k}</dt>
+                <dd className="font-mono text-xs text-ink-2">{f.v}</dd>
+              </div>
+            ))}
+          </dl>
+          <button
+            onClick={scrollTo("experience")}
+            className="group inline-flex items-center gap-2 self-start font-mono text-xs uppercase tracking-[0.14em] text-ink-3 transition-colors hover:text-accent-ink sm:self-end"
+          >
+            Selected work
+            <ArrowDownRight
+              size={15}
+              className="transition-transform duration-200 group-hover:translate-x-0.5 group-hover:translate-y-0.5"
+            />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default Hero;

@@ -1,269 +1,173 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { Project } from '@/data/portfolio-data';
-import { ArrowUpRight, Building2, CheckCircle2, Folder } from 'lucide-react';
-import TechIcon from './TechIcon';
-import ProjectModal from './ProjectModal';
-import EnterpriseWorkflowArtwork from './EnterpriseWorkflowArtwork';
+import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
+import { Project } from "@/data/portfolio-data";
+import TechIcon from "./TechIcon";
+import ProjectModal from "./ProjectModal";
+
+const toSlug = (t: string) =>
+  t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 interface ProjectCardProps {
-    project: Project;
-    index: number;
+  project: Project;
+  index: number;
+  featured?: boolean;
+  idxPrefix?: string;
 }
 
-const toProjectSlug = (title: string) =>
-    title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, featured = false, idxPrefix = "PRJ" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const slug = `project-${toSlug(project.title)}`;
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, index }) => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const visibleTech = project.techStack.flatMap((stack) => stack.items);
-    const highlightPairs = project.highlights?.slice(0, 2) ?? [];
-    const caseStudyPreviewItems = project.caseStudy?.cardTags.slice(0, 3) ?? [];
-    const projectSlug = `project-${toProjectSlug(project.title)}`;
+  useEffect(() => {
+    const sync = () => setIsOpen(window.location.hash === `#${slug}`);
+    sync();
+    window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, [slug]);
 
-    useEffect(() => {
-        const syncFromHash = () => {
-            setIsModalOpen(window.location.hash === `#${projectSlug}`);
-        };
+  const openModal = () => {
+    window.history.replaceState(null, "", `#${slug}`);
+    setIsOpen(true);
+  };
+  const closeModal = () => {
+    if (window.location.hash === `#${slug}`) window.history.replaceState(null, "", "#projects");
+    setIsOpen(false);
+  };
 
-        syncFromHash();
-        window.addEventListener('hashchange', syncFromHash);
+  const tech = project.techStack.flatMap((s) => s.items);
+  const metrics =
+    project.caseStudy?.metrics.map((m) => ({ value: m.value, label: m.label })) ??
+    project.highlights?.map((h) => ({ value: h.value, label: h.label })) ??
+    [];
+  const idxLabel = `${idxPrefix}-${String(index + 1).padStart(2, "0")}`;
+  const ctaLabel = project.ctaLabel ?? (project.caseStudy ? "Open case study" : "View details");
+  const modal = <ProjectModal project={project} isOpen={isOpen} onClose={closeModal} />;
 
-        return () => {
-            window.removeEventListener('hashchange', syncFromHash);
-        };
-    }, [projectSlug]);
+  const TechChips = ({ max }: { max: number }) => (
+    <div className="flex flex-wrap gap-1.5">
+      {tech.slice(0, max).map((t, i) => (
+        <span
+          key={`${t}-${i}`}
+          className="inline-flex items-center gap-1.5 rounded-[3px] border border-rule-2 bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-2"
+        >
+          <TechIcon name={t} className="h-3 w-3 text-ink-3" />
+          {t}
+        </span>
+      ))}
+      {tech.length > max && (
+        <span className="inline-flex items-center rounded-[3px] border border-rule bg-paper-2 px-2 py-1 font-mono text-[11px] text-ink-3">
+          +{tech.length - max}
+        </span>
+      )}
+    </div>
+  );
 
-    const openModal = () => {
-        window.history.replaceState(null, '', `#${projectSlug}`);
-        setIsModalOpen(true);
-    };
+  const AccentEdge = () => (
+    <span
+      className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+      aria-hidden="true"
+    />
+  );
 
-    const closeModal = () => {
-        if (window.location.hash === `#${projectSlug}`) {
-            window.history.replaceState(null, '', '#projects');
-        }
-        setIsModalOpen(false);
-    };
-
-    const modal = (
-        <ProjectModal
-            project={project}
-            isOpen={isModalOpen}
-            onClose={closeModal}
-        />
-    );
-
-    if (project.caseStudy) {
-        return (
-            <>
-                <motion.article
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ y: -4 }}
-                    className="group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-slate-800/80 bg-[linear-gradient(180deg,rgba(7,13,24,0.98),rgba(2,6,23,0.99))] shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition-all duration-300"
-                >
-                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-sky-400/40 via-emerald-300/35 to-transparent" />
-
-                    <div className="relative h-[238px] overflow-hidden border-b border-slate-800/80">
-                        <EnterpriseWorkflowArtwork
-                            variant="card"
-                            showBadge
-                            badgeLabel={project.caseStudy.cardLabel}
-                            theme={project.caseStudy.theme}
-                        />
-                        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.05)_0%,rgba(2,6,23,0)_42%,rgba(2,6,23,0.76)_100%)]" />
-                    </div>
-
-                    <div className="relative flex flex-1 flex-col p-6 md:p-7">
-                        <div className="mb-5 flex items-center justify-between gap-4">
-                            <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-400">
-                                <Building2 size={14} className="text-slate-500" />
-                                {project.company ?? 'Selected Project'}
-                            </span>
-                            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                                {project.category ?? 'Case Study'}
-                            </span>
-                        </div>
-
-                        <div>
-                            <h3 className="max-w-xl text-[1.85rem] font-semibold leading-[1.08] text-white transition-colors duration-300 group-hover:text-sky-50">
-                                {project.title}
-                            </h3>
-                            <p className="mt-4 max-w-xl text-base leading-7 text-slate-300/88">
-                                {project.caseStudy.subtitle}
-                            </p>
-                        </div>
-
-                        <div className="mt-6 border-y border-slate-800/75 py-5">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
-                                Core Capabilities
-                            </p>
-                            <ul className="mt-4 space-y-3">
-                                {caseStudyPreviewItems.map((tag) => (
-                                    <li key={tag} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
-                                        <CheckCircle2 size={15} className="mt-1 shrink-0 text-emerald-300" />
-                                        <span>{tag}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        <button
-                            onClick={openModal}
-                            className="mt-auto flex w-full items-center justify-between rounded-2xl px-1 pt-6 text-left transition-colors duration-300 hover:text-sky-100"
-                        >
-                            <span className="text-sm font-semibold uppercase tracking-[0.16em] text-sky-100">
-                                {project.ctaLabel ?? 'Open Case Study'}
-                            </span>
-
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-700/90 bg-slate-950/65 text-sky-200 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:border-sky-300/35">
-                                <ArrowUpRight size={18} />
-                            </span>
-                        </button>
-                    </div>
-                </motion.article>
-
-                {modal}
-            </>
-        );
-    }
-
+  if (featured) {
     return (
-        <>
-            <motion.article
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -8 }}
-                className="group relative flex h-full flex-col overflow-hidden rounded-[30px] border border-slate-800/80 bg-[linear-gradient(180deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))] shadow-[0_18px_60px_rgba(2,6,23,0.34)] transition-all duration-300"
-            >
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(56,189,248,0.14),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.1),transparent_28%)] opacity-70 transition-opacity duration-300 group-hover:opacity-100" />
-                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
-
-                <div className="relative flex h-full flex-col p-6 md:p-7">
-                    <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="rounded-full border border-sky-400/20 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-sky-200/85">
-                                    {project.category ?? 'Selected Project'}
-                                </span>
-                                {project.company && (
-                                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-900/70 px-3 py-1 text-xs font-medium text-slate-400">
-                                        <Building2 size={12} />
-                                        {project.company}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div>
-                                <h3 className="max-w-xl text-2xl font-semibold leading-tight text-white transition-colors duration-300 group-hover:text-sky-100">
-                                    {project.title}
-                                </h3>
-                                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300/90">
-                                    {project.description}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="hidden shrink-0 sm:block">
-                            {project.logo && project.logo.startsWith('/') ? (
-                                <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-950/70 shadow-[0_12px_30px_rgba(2,6,23,0.34)]">
-                                    <Image
-                                        src={project.logo}
-                                        alt={`${project.title} visual`}
-                                        fill
-                                        className="object-contain p-2.5 opacity-90"
-                                        sizes="64px"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-sky-400/20 bg-sky-400/10 text-sky-200">
-                                    <Folder size={28} />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-
-                    {highlightPairs.length > 0 && (
-                        <div className="mt-6 grid grid-cols-2 gap-3">
-                            {highlightPairs.map((highlight, itemIndex) => (
-                                <div
-                                    key={`${highlight.label}-${itemIndex}`}
-                                    className="rounded-2xl border border-slate-800 bg-slate-950/55 p-4"
-                                >
-                                    <p className="text-sm font-semibold text-white">{highlight.value}</p>
-                                    <p className="mt-1 text-xs leading-5 text-slate-400">{highlight.label}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="mt-6 flex-grow">
-                        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                            Core Focus
-                        </p>
-                        <ul className="space-y-2.5">
-                            {project.tasks.slice(0, 3).map((task, taskIndex) => (
-                                <li key={taskIndex} className="flex items-start gap-3 text-sm leading-6 text-slate-300">
-                                    <CheckCircle2 size={15} className="mt-1 shrink-0 text-emerald-400" />
-                                    <span>{task}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div className="mt-6 border-t border-slate-800/80 pt-5">
-                        <div className="mb-5 flex flex-wrap gap-2">
-                            {visibleTech.slice(0, 4).map((tech, techIndex) => (
-                                <span
-                                    key={`${tech}-${techIndex}`}
-                                    className="inline-flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-900/70 px-3 py-2 text-xs font-medium text-slate-300"
-                                >
-                                    <TechIcon key={`icon-${tech}-${techIndex}`} name={tech} className="h-3.5 w-3.5" />
-                                    {tech}
-                                </span>
-                            ))}
-                            {visibleTech.length > 4 && (
-                                <span className="inline-flex items-center rounded-xl border border-slate-800 bg-slate-900/50 px-3 py-2 text-xs font-medium text-slate-500">
-                                    +{visibleTech.length - 4}
-                                </span>
-                            )}
-                        </div>
-
-                        <button
-                            onClick={openModal}
-                            className="flex w-full items-center justify-between rounded-[22px] border border-sky-400/20 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(2,6,23,0.95))] px-4 py-4 text-left transition-all duration-300 hover:border-sky-300/35 hover:bg-[linear-gradient(180deg,rgba(15,23,42,1),rgba(8,47,73,0.92))]"
-                        >
-                            <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-slate-500">
-                                    Case Study
-                                </p>
-                                <p className="mt-1 text-sm font-semibold text-white">
-                                    {project.ctaLabel ?? 'View Details'}
-                                </p>
-                            </div>
-
-                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-sky-300/20 bg-sky-400/10 text-sky-200 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1">
-                                <ArrowUpRight size={18} />
-                            </span>
-                        </button>
-                    </div>
+      <>
+        <article className="group relative flex flex-col overflow-hidden rounded-md border border-rule-2 bg-paper transition-colors duration-200 hover:border-ink-3 lg:flex-row">
+          <AccentEdge />
+          <div className="flex flex-col justify-between gap-7 border-b border-rule bg-paper-2/50 p-6 lg:w-[38%] lg:border-b-0 lg:border-r">
+            <div className="flex items-center justify-between">
+              <span className="font-mono text-xs font-semibold text-accent-ink">{idxLabel}</span>
+              <span className="tech-label text-[0.625rem]">Flagship</span>
+            </div>
+            {project.logo && (
+              <div className="relative h-16 w-16 overflow-hidden rounded-md border border-rule-2 bg-paper">
+                <Image src={project.logo} alt={`${project.title} logo`} fill className="object-contain p-2.5" sizes="64px" />
+              </div>
+            )}
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
+              {metrics.slice(0, 4).map((m, i) => (
+                <div key={i}>
+                  <dt className="text-xl font-semibold tracking-tight text-ink tabular-nums">{m.value}</dt>
+                  <dd className="mt-0.5 font-mono text-[11px] leading-tight text-ink-3">{m.label}</dd>
                 </div>
-            </motion.article>
-
-            {modal}
-        </>
+              ))}
+            </dl>
+          </div>
+          <div className="flex flex-1 flex-col p-6 lg:p-7">
+            <span className="tech-label">
+              {project.category} · {project.company}
+            </span>
+            <h3 className="mt-3 text-2xl font-semibold leading-tight text-ink">{project.title}</h3>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-2">{project.description}</p>
+            <div className="mt-5">
+              <TechChips max={6} />
+            </div>
+            <button
+              onClick={openModal}
+              className="mt-auto flex items-center gap-2 pt-7 font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink transition-colors group-hover:text-accent-ink"
+            >
+              {ctaLabel}
+              <ArrowUpRight
+                size={16}
+                className="text-accent-ink transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              />
+            </button>
+          </div>
+        </article>
+        {modal}
+      </>
     );
+  }
+
+  return (
+    <>
+      <article className="group relative flex flex-col overflow-hidden rounded-md border border-rule-2 bg-paper transition-all duration-200 hover:border-ink-3 hover:shadow-[0_14px_34px_-20px_rgba(20,24,28,0.30)]">
+        <AccentEdge />
+        <div className="flex items-center justify-between border-b border-rule px-5 py-3">
+          <span className="font-mono text-xs font-semibold text-accent-ink">{idxLabel}</span>
+          <span className="tech-label text-[0.625rem]">{project.company ? project.category ?? "Project" : "Personal"}</span>
+        </div>
+        <div className="flex flex-1 flex-col p-5">
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-lg font-semibold leading-snug text-ink">{project.title}</h3>
+            {project.logo && (
+              <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-rule-2 bg-paper">
+                <Image src={project.logo} alt="" fill className="object-contain p-1.5" sizes="40px" />
+              </div>
+            )}
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-ink-2">{project.description}</p>
+          {metrics.length > 0 && (
+            <dl className="mt-4 flex gap-6">
+              {metrics.slice(0, 2).map((m, i) => (
+                <div key={i}>
+                  <dt className="text-base font-semibold text-ink tabular-nums">{m.value}</dt>
+                  <dd className="font-mono text-[10px] uppercase tracking-wide text-ink-3">{m.label}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
+          <div className="mt-5">
+            <TechChips max={4} />
+          </div>
+        </div>
+        <button
+          onClick={openModal}
+          className="flex items-center justify-between border-t border-rule px-5 py-3 text-left transition-colors group-hover:bg-paper-2/60"
+        >
+          <span className="font-mono text-xs font-semibold uppercase tracking-[0.1em] text-ink">{ctaLabel}</span>
+          <ArrowUpRight
+            size={15}
+            className="text-accent-ink transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+          />
+        </button>
+      </article>
+      {modal}
+    </>
+  );
 };
 
 export default ProjectCard;

@@ -1,45 +1,162 @@
 @import "tailwindcss";
 
+/* ============================================================
+   BLUEPRINT design system
+   Light technical-drafting register. Cool architectural ground,
+   near-black ink, one committed International-orange signal.
+   All color in OKLCH. Neutrals lean faintly cool (the drawing
+   sheet); the accent is the warm complement (safety orange).
+   ============================================================ */
+
+@theme {
+  /* Surfaces ------------------------------------------------ */
+  --color-ground: oklch(0.966 0.004 250);   /* page background, cool near-white */
+  --color-paper: oklch(0.995 0.0015 250);   /* raised "drawing sheet" surface  */
+  --color-paper-2: oklch(0.945 0.005 250);  /* recessed / inset fields          */
+
+  /* Ink ----------------------------------------------------- */
+  --color-ink: oklch(0.23 0.012 255);       /* primary text, near-black         */
+  --color-ink-2: oklch(0.44 0.016 255);     /* secondary text                   */
+  --color-ink-3: oklch(0.52 0.016 255);     /* muted / mono annotation labels   */
+
+  /* Lines --------------------------------------------------- */
+  --color-rule: oklch(0.88 0.008 250);      /* hairline grid + dividers         */
+  --color-rule-2: oklch(0.80 0.010 250);    /* stronger structural lines        */
+
+  /* Accent — International orange --------------------------- */
+  --color-accent: oklch(0.645 0.205 38);    /* markers, strokes, key nodes      */
+  --color-accent-ink: oklch(0.555 0.18 36); /* accent as TEXT / CTA bg (AA)     */
+  --color-accent-deep: oklch(0.50 0.165 35);/* CTA hover                        */
+  --color-accent-wash: oklch(0.645 0.205 38 / 0.10); /* tint fills              */
+
+  /* Type --------------------------------------------------- */
+  --font-sans: var(--font-bai-jamjuree), "Bai Jamjuree Fallback", system-ui, sans-serif;
+  --font-mono: var(--font-spline-mono), ui-monospace, "SFMono-Regular", monospace;
+
+  /* Motion ------------------------------------------------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Z-scale (semantic) ------------------------------------- */
+  --z-grid: 0;
+  --z-base: 10;
+  --z-sticky: 40;
+  --z-nav: 50;
+  --z-overlay: 60;
+  --z-popover: 70;
+}
+
+/* Metric-matched fallback so the Thai/Latin web font swaps without shift */
+@font-face {
+  font-family: "Bai Jamjuree Fallback";
+  src: local("Arial");
+  size-adjust: 104%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--color-rule);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-color: var(--color-ground);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-kerning: normal;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
+::selection {
+  background: var(--color-accent-wash);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* ---- Blueprint grid background ------------------------------
+   Two layers: a fine 24px grid and a coarse 120px grid, both in
+   the hairline rule color at low alpha. Used on hero surfaces.   */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, oklch(0.80 0.01 250 / 0.30) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.80 0.01 250 / 0.30) 1px, transparent 1px),
+    linear-gradient(to right, oklch(0.82 0.01 250 / 0.55) 1px, transparent 1px),
+    linear-gradient(to bottom, oklch(0.82 0.01 250 / 0.55) 1px, transparent 1px);
+  background-size:
+    24px 24px,
+    24px 24px,
+    120px 120px,
+    120px 120px;
+  background-position: -1px -1px;
+}
+
+/* Soft fade so the grid never competes with content */
+.blueprint-grid-fade {
+  -webkit-mask-image: radial-gradient(125% 115% at 50% 0%, #000 38%, transparent 100%);
+  mask-image: radial-gradient(125% 115% at 50% 0%, #000 38%, transparent 100%);
+}
+
+/* Mono micro-label used for annotations, specs, title-block fields */
+.tech-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;       /* 11px */
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+  font-feature-settings: "tnum" 1;
+}
+
+/* Custom scrollbar, light theme */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.45) rgba(15, 23, 42, 0.4);
+  scrollbar-color: var(--color-rule-2) transparent;
 }
-
 .custom-scrollbar::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
-
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.35);
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-rule-2);
+  border: 2px solid var(--color-ground);
+  border-radius: 9999px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(56, 189, 248, 0.35), rgba(148, 163, 184, 0.45));
-  border: 2px solid rgba(15, 23, 42, 0.5);
-  border-radius: 9999px;
+/* Blinking caret for the live code panel */
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+.code-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  vertical-align: text-bottom;
+  background: var(--color-accent);
+  animation: caret-blink 1.05s steps(1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
