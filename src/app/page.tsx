@@ -14,7 +14,7 @@ export default function Home() {
   const personal = portfolioData.filter((p) => p.company !== "MV Solution Co., Ltd");
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-200">
+    <main className="min-h-screen bg-ground text-ink">
       <Navbar />
 
       <div id="home">
@@ -81,9 +81,17 @@ export default function Home() {
       <ContactCTA />
       <VisitorCounter />
 
-      <footer className="bg-slate-950 text-slate-500 py-12 border-t border-slate-900 relative z-10">
-        <div className="container mx-auto px-6 text-center">
-          <p>© {new Date().getFullYear()} Phaibun Poonmaroeng. Built with Next.js, Tailwind & Framer Motion.</p>
+      <footer className="border-t border-rule-2 bg-ground">
+        <div className="mx-auto flex max-w-6xl flex-col items-start gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10">
+          <div className="flex items-center gap-3">
+            <span className="h-2.5 w-2.5 shrink-0 bg-accent" aria-hidden="true" />
+            <span className="font-mono text-sm font-semibold uppercase tracking-[0.16em] text-ink">
+              Phaibun Poonmaroeng
+            </span>
+          </div>
+          <p className="tech-label">
+            © {new Date().getFullYear()} · Built with Next.js · Tailwind · Framer Motion
+          </p>
         </div>
       </footer>
     </main>

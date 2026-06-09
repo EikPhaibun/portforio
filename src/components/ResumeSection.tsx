@@ -1,242 +1,180 @@
 "use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, GraduationCap, Award, Code, ChevronDown, ChevronUp } from 'lucide-react';
-import { profileData } from '@/data/portfolio-data';
-import TechIcon from './TechIcon';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Briefcase, GraduationCap, Award, Code2, ChevronDown, MapPin } from "lucide-react";
+import { profileData } from "@/data/portfolio-data";
+import TechIcon from "./TechIcon";
+
+const SectionLabel = ({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) => (
+  <div className="mb-6 flex items-center gap-3">
+    <Icon size={16} className="shrink-0 text-accent-ink" />
+    <h3 className="font-mono text-sm font-semibold uppercase tracking-[0.14em] text-ink">{children}</h3>
+    <span className="h-px flex-1 bg-rule" aria-hidden="true" />
+  </div>
+);
 
 const ResumeSection = () => {
-    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const toggle = (key: string) => setExpanded((p) => ({ ...p, [key]: !p[key] }));
 
-    const toggleSection = (key: string) => {
-        setExpandedSections(prev => ({
-            ...prev,
-            [key]: !prev[key]
-        }));
-    };
+  return (
+    <section className="border-t border-rule bg-ground py-20 sm:py-28">
+      <div className="mx-auto max-w-6xl px-6 sm:px-10">
+        {/* header */}
+        <div className="flex flex-col gap-5 border-b border-rule pb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="tech-label">Sheet 03 — Experience &amp; expertise</p>
+            <h2 className="mt-3 text-[clamp(1.9rem,4vw,2.75rem)] font-semibold tracking-[-0.02em] text-ink text-balance">
+              A working record
+            </h2>
+          </div>
+          <p className="max-w-sm text-sm leading-relaxed text-ink-2">
+            The roles, the schooling, and the tools I reach for day to day.
+          </p>
+        </div>
 
-    return (
-        <section className="py-24 relative z-10">
-            <div className="container mx-auto px-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="text-center mb-16"
-                >
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Resume & Expertise</h2>
-                    <p className="text-slate-400 max-w-2xl mx-auto">
-                        A timeline of my professional journey and technical capabilities.
-                    </p>
-                </motion.div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-
-                    {/* Left Column: Experience & Education */}
-                    <div className="lg:col-span-8 space-y-12">
-
-                        {/* Experience */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="p-3 bg-blue-500/10 rounded-lg text-blue-400">
-                                    <Briefcase size={24} />
-                                </div>
-                                <h3 className="text-2xl font-bold text-white">Work Experience</h3>
-                            </div>
-
-                            <div className="space-y-8 border-l-2 border-slate-800 ml-3 pl-8 relative">
-                                {profileData.experience.map((exp, index) => (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        whileInView={{ opacity: 1, x: 0 }}
-                                        viewport={{ once: true }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="relative"
-                                    >
-                                        <span className="absolute -left-[41px] top-0 w-5 h-5 rounded-full border-4 border-slate-950 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                                        <div className="bg-slate-900/50 backdrop-blur-sm p-6 rounded-xl border border-slate-800 hover:border-slate-700 transition-colors">
-                                            <div className="flex flex-wrap justify-between items-start mb-4">
-                                                <div>
-                                                    <h4 className="text-xl font-bold text-white">{exp.role}</h4>
-                                                    <p className="text-blue-400 font-medium">{exp.company}</p>
-                                                </div>
-                                                <span className="px-3 py-1 bg-slate-800 text-slate-300 text-sm rounded-full font-medium border border-slate-700">
-                                                    {exp.period}
-                                                </span>
-                                            </div>
-                                            <div className="space-y-3">
-                                                {exp.description.map((item, i) => {
-                                                    if (typeof item === 'string') {
-                                                        return (
-                                                            <div key={i} className="text-slate-400 text-sm leading-relaxed flex items-start">
-                                                                <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-slate-600 rounded-full flex-shrink-0" />
-                                                                {item}
-                                                            </div>
-                                                        );
-                                                    } else {
-                                                        const sectionKey = `${index}-${i}`;
-                                                        const isExpanded = expandedSections[sectionKey] ?? false;
-
-                                                        return (
-                                                            <div key={i} className="mt-3 first:mt-0">
-                                                                <button
-                                                                    onClick={() => toggleSection(sectionKey)}
-                                                                    className="w-full text-left group"
-                                                                >
-                                                                    <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 hover:border-blue-500/40 transition-all">
-                                                                        <div className="flex items-center gap-3">
-                                                                            <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-                                                                            <h5 className="text-slate-100 font-bold text-sm">
-                                                                                {item.title}
-                                                                            </h5>
-                                                                            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 text-xs rounded-full font-medium">
-                                                                                {item.items.length} items
-                                                                            </span>
-                                                                        </div>
-                                                                        <motion.div
-                                                                            animate={{ rotate: isExpanded ? 180 : 0 }}
-                                                                            transition={{ duration: 0.2 }}
-                                                                        >
-                                                                            <ChevronDown size={18} className="text-slate-400 group-hover:text-blue-400 transition-colors" />
-                                                                        </motion.div>
-                                                                    </div>
-                                                                </button>
-
-                                                                <AnimatePresence>
-                                                                    {isExpanded && (
-                                                                        <motion.div
-                                                                            initial={{ height: 0, opacity: 0 }}
-                                                                            animate={{ height: "auto", opacity: 1 }}
-                                                                            exit={{ height: 0, opacity: 0 }}
-                                                                            transition={{ duration: 0.3 }}
-                                                                            className="overflow-hidden"
-                                                                        >
-                                                                            <ul className="space-y-2 mt-3 ml-2 border-l-2 border-slate-800 pl-4">
-                                                                                {item.items.map((subItem, j) => (
-                                                                                    <motion.li
-                                                                                        key={j}
-                                                                                        initial={{ x: -10, opacity: 0 }}
-                                                                                        animate={{ x: 0, opacity: 1 }}
-                                                                                        transition={{ delay: j * 0.05 }}
-                                                                                        className="text-slate-400 text-sm leading-relaxed flex items-start group/item hover:text-slate-300 transition-colors"
-                                                                                    >
-                                                                                        <span className="mr-2 mt-1.5 w-1.5 h-1.5 bg-slate-600 rounded-full flex-shrink-0 group-hover/item:bg-blue-400 transition-colors" />
-                                                                                        {subItem}
-                                                                                    </motion.li>
-                                                                                ))}
-                                                                            </ul>
-                                                                        </motion.div>
-                                                                    )}
-                                                                </AnimatePresence>
-                                                            </div>
-                                                        );
-                                                    }
-                                                })}
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Education */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="p-3 bg-emerald-500/10 rounded-lg text-emerald-400">
-                                    <GraduationCap size={24} />
-                                </div>
-                                <h3 className="text-2xl font-bold text-white">Education</h3>
-                            </div>
-
-                            <div className="grid gap-6">
-                                {profileData.education.map((edu, index) => (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        whileInView={{ opacity: 1, y: 0 }}
-                                        viewport={{ once: true }}
-                                        className="bg-slate-900/50 backdrop-blur-sm p-6 rounded-xl border border-slate-800"
-                                    >
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h4 className="text-lg font-bold text-white">{edu.school}</h4>
-                                            <span className="text-sm text-slate-500">{edu.period}</span>
-                                        </div>
-                                        <p className="text-slate-300 font-medium mb-1">{edu.degree}</p>
-                                        <p className="text-slate-500 text-sm">{edu.details}</p>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-
+        <div className="mt-12 grid gap-12 lg:grid-cols-12">
+          {/* left: experience + education */}
+          <div className="space-y-14 lg:col-span-8">
+            {/* work experience */}
+            <div>
+              <SectionLabel icon={Briefcase}>Work experience</SectionLabel>
+              <div className="space-y-5">
+                {profileData.experience.map((exp, index) => (
+                  <article key={index} className="rounded-md border border-rule-2 bg-paper p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-rule pb-4">
+                      <div>
+                        <h4 className="text-lg font-semibold leading-snug text-ink">{exp.role}</h4>
+                        <p className="mt-1 font-mono text-sm text-accent-ink">{exp.company}</p>
+                      </div>
+                      {exp.location && (
+                        <span className="inline-flex items-center gap-1.5 tech-label">
+                          <MapPin size={12} className="text-ink-3" />
+                          {exp.location}
+                        </span>
+                      )}
                     </div>
 
-                    {/* Right Column: Skills & Certificates */}
-                    <div className="lg:col-span-4 space-y-12">
-
-                        {/* Skills */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="p-3 bg-purple-500/10 rounded-lg text-purple-400">
-                                    <Code size={24} />
-                                </div>
-                                <h3 className="text-2xl font-bold text-white">Technical Skills</h3>
+                    <div className="mt-4 space-y-3">
+                      {exp.description.map((item, i) => {
+                        if (typeof item === "string") {
+                          return (
+                            <div key={i} className="flex items-start gap-2.5 text-sm leading-7 text-ink-2">
+                              <span className="mt-[0.6rem] h-1 w-1 shrink-0 bg-rule-2" aria-hidden="true" />
+                              {item}
                             </div>
-
-                            <div className="space-y-8">
-                                {profileData.skills.map((skillGroup, index) => (
-                                    <div key={index}>
-                                        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">
-                                            {skillGroup.category}
-                                        </h4>
-                                        <div className="flex flex-wrap gap-3">
-                                            {skillGroup.items.map((skill, i) => (
-                                                <motion.div
-                                                    key={i}
-                                                    whileHover={{ scale: 1.05 }}
-                                                    className="flex items-center gap-3 px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-xl hover:bg-slate-800 hover:border-slate-600 transition-all cursor-default group"
-                                                >
-                                                    <TechIcon key={`tech-${skill}-${i}`} name={skill} className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
-                                                    <span className="text-slate-300 text-sm font-medium group-hover:text-white transition-colors">
-                                                        {skill}
-                                                    </span>
-                                                </motion.div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Certificates */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-8">
-                                <div className="p-3 bg-orange-500/10 rounded-lg text-orange-400">
-                                    <Award size={24} />
-                                </div>
-                                <h3 className="text-2xl font-bold text-white">Certificates</h3>
-                            </div>
-
-                            <div className="bg-slate-900/50 backdrop-blur-sm rounded-xl border border-slate-800 overflow-hidden">
-                                {profileData.certificates.map((cert, index) => (
-                                    <div
-                                        key={index}
-                                        className="p-4 border-b border-slate-800 last:border-0 flex items-start gap-3"
-                                    >
-                                        <Award size={18} className="text-orange-400 mt-1 flex-shrink-0" />
-                                        <span className="text-slate-300 text-sm font-medium">{cert}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
+                          );
+                        }
+                        const key = `${index}-${i}`;
+                        const isOpen = expanded[key] ?? false;
+                        return (
+                          <div key={i}>
+                            <button
+                              onClick={() => toggle(key)}
+                              aria-expanded={isOpen}
+                              className="flex w-full items-center justify-between gap-3 rounded-sm border border-rule-2 bg-paper-2/50 px-4 py-3 text-left transition-colors hover:border-ink-3"
+                            >
+                              <span className="flex items-center gap-3">
+                                <span className="h-1.5 w-1.5 shrink-0 bg-accent" aria-hidden="true" />
+                                <span className="text-sm font-semibold text-ink">{item.title}</span>
+                                <span className="font-mono text-[11px] text-ink-3">{item.items.length} items</span>
+                              </span>
+                              <ChevronDown
+                                size={16}
+                                className={`shrink-0 text-ink-3 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                              />
+                            </button>
+                            <AnimatePresence initial={false}>
+                              {isOpen && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                                  className="overflow-hidden"
+                                >
+                                  <ul className="mt-3 space-y-2.5 border-l border-rule pl-4">
+                                    {item.items.map((sub, j) => (
+                                      <li key={j} className="flex items-start gap-2.5 text-sm leading-7 text-ink-2">
+                                        <span className="mt-[0.6rem] h-1 w-1 shrink-0 bg-accent" aria-hidden="true" />
+                                        {sub}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
                     </div>
-
-                </div>
+                  </article>
+                ))}
+              </div>
             </div>
-        </section>
-    );
+
+            {/* education */}
+            <div>
+              <SectionLabel icon={GraduationCap}>Education</SectionLabel>
+              <div className="grid gap-5">
+                {profileData.education.map((edu, index) => (
+                  <article key={index} className="rounded-md border border-rule-2 bg-paper p-6">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <h4 className="max-w-md text-base font-semibold text-ink">{edu.school}</h4>
+                      <span className="tech-label">{edu.period}</span>
+                    </div>
+                    <p className="mt-2 text-sm font-medium text-ink-2">{edu.degree}</p>
+                    {edu.details && <p className="mt-1 text-sm text-ink-3">{edu.details}</p>}
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* right: skills + certificates */}
+          <div className="space-y-14 lg:col-span-4">
+            <div>
+              <SectionLabel icon={Code2}>Technical skills</SectionLabel>
+              <div className="space-y-6">
+                {profileData.skills.map((group, index) => (
+                  <div key={index}>
+                    <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.12em] text-ink-3">{group.category}</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {group.items.map((skill, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1.5 rounded-[3px] border border-rule-2 bg-paper px-2.5 py-1.5 font-mono text-[11px] text-ink-2"
+                        >
+                          <TechIcon name={skill} className="h-3 w-3 text-ink-3" />
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <SectionLabel icon={Award}>Certificates</SectionLabel>
+              <div className="overflow-hidden rounded-md border border-rule-2 bg-paper">
+                {profileData.certificates.map((cert, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 border-b border-rule px-4 py-3.5 last:border-0"
+                  >
+                    <Award size={15} className="mt-0.5 shrink-0 text-accent-ink" />
+                    <span className="text-sm leading-6 text-ink-2">{cert}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 };
 
 export default ResumeSection;

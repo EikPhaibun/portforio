@@ -98,15 +98,10 @@ const MAX_LINES = Math.max(...FILES.map((f) => f.lines.length));
 
 export default function CodeStream() {
   const reduce = useReducedMotion();
-  const [st, setSt] = useState(() =>
-    reduce ? { fi: 0, n: fileTotal(FILES[0]), done: true } : { fi: 0, n: 0, done: false }
-  );
+  const [st, setSt] = useState({ fi: 0, n: 0, done: false });
 
   useEffect(() => {
-    if (reduce) {
-      setSt({ fi: 0, n: fileTotal(FILES[0]), done: true });
-      return;
-    }
+    if (reduce) return;
     let fi = 0;
     let count = 0;
     let hold = 0;
@@ -137,8 +132,9 @@ export default function CodeStream() {
   }, [reduce]);
 
   const file = FILES[st.fi];
-  const { n, done } = st;
-  let acc = 0;
+  // Under reduced motion, derive the fully-revealed state at render (no setState in effect).
+  const n = reduce ? fileTotal(file) : st.n;
+  const done = reduce ? true : st.done;
 
   return (
     <figure
@@ -177,17 +173,15 @@ export default function CodeStream() {
             <code className="grid grid-cols-[2ch_1fr] gap-x-3">
               {file.lines.map((line, li) => {
                 const len = lineLen(line);
-                const startIdx = acc;
-                const nextStart = acc + len + 1;
+                const startIdx = file.lines.slice(0, li).reduce((s, l) => s + lineLen(l) + 1, 0);
+                const nextStart = startIdx + len + 1;
                 const visible = Math.max(0, Math.min(len, n - startIdx));
                 const reached = n > startIdx || (li === 0 && n > 0) || visible > 0;
                 const caretHere = !done && n >= startIdx && n < nextStart;
-                acc = nextStart;
 
-                let used = 0;
                 const parts = line.map(([text, type], ti) => {
-                  const shown = Math.max(0, Math.min(text.length, visible - used));
-                  used += text.length;
+                  const before = line.slice(0, ti).reduce((s, t) => s + t[0].length, 0);
+                  const shown = Math.max(0, Math.min(text.length, visible - before));
                   if (shown <= 0) return null;
                   return (
                     <span key={ti} style={{ color: COLOR[type], fontStyle: type === "com" ? "italic" : undefined }}>

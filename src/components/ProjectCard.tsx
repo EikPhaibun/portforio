@@ -10,6 +10,32 @@ import ProjectModal from "./ProjectModal";
 const toSlug = (t: string) =>
   t.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+const AccentEdge = () => (
+  <span
+    className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
+    aria-hidden="true"
+  />
+);
+
+const TechChips = ({ tech, max }: { tech: string[]; max: number }) => (
+  <div className="flex flex-wrap gap-1.5">
+    {tech.slice(0, max).map((t, i) => (
+      <span
+        key={`${t}-${i}`}
+        className="inline-flex items-center gap-1.5 rounded-[3px] border border-rule-2 bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-2"
+      >
+        <TechIcon name={t} className="h-3 w-3 text-ink-3" />
+        {t}
+      </span>
+    ))}
+    {tech.length > max && (
+      <span className="inline-flex items-center rounded-[3px] border border-rule bg-paper-2 px-2 py-1 font-mono text-[11px] text-ink-3">
+        +{tech.length - max}
+      </span>
+    )}
+  </div>
+);
+
 interface ProjectCardProps {
   project: Project;
   index: number;
@@ -46,32 +72,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, featured = fa
   const ctaLabel = project.ctaLabel ?? (project.caseStudy ? "Open case study" : "View details");
   const modal = <ProjectModal project={project} isOpen={isOpen} onClose={closeModal} />;
 
-  const TechChips = ({ max }: { max: number }) => (
-    <div className="flex flex-wrap gap-1.5">
-      {tech.slice(0, max).map((t, i) => (
-        <span
-          key={`${t}-${i}`}
-          className="inline-flex items-center gap-1.5 rounded-[3px] border border-rule-2 bg-paper px-2.5 py-1 font-mono text-[11px] text-ink-2"
-        >
-          <TechIcon name={t} className="h-3 w-3 text-ink-3" />
-          {t}
-        </span>
-      ))}
-      {tech.length > max && (
-        <span className="inline-flex items-center rounded-[3px] border border-rule bg-paper-2 px-2 py-1 font-mono text-[11px] text-ink-3">
-          +{tech.length - max}
-        </span>
-      )}
-    </div>
-  );
-
-  const AccentEdge = () => (
-    <span
-      className="absolute inset-x-0 top-0 h-0.5 origin-left scale-x-0 bg-accent transition-transform duration-300 group-hover:scale-x-100"
-      aria-hidden="true"
-    />
-  );
-
   if (featured) {
     return (
       <>
@@ -103,7 +103,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, featured = fa
             <h3 className="mt-3 text-2xl font-semibold leading-tight text-ink">{project.title}</h3>
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-2">{project.description}</p>
             <div className="mt-5">
-              <TechChips max={6} />
+              <TechChips tech={tech} max={6} />
             </div>
             <button
               onClick={openModal}
@@ -151,7 +151,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, index, featured = fa
             </dl>
           )}
           <div className="mt-5">
-            <TechChips max={4} />
+            <TechChips tech={tech} max={4} />
           </div>
         </div>
         <button
