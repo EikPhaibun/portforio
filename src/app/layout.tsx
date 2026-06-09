@@ -18,7 +18,7 @@ const splineMono = Spline_Sans_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://eikphaibun.github.io";
+const SITE_URL = "https://eikphaibun.github.io/portforio";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

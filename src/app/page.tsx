@@ -6,7 +6,6 @@ import Hero from '@/components/Hero';
 import ProjectCard from '@/components/ProjectCard';
 import ResumeSection from '@/components/ResumeSection';
 import ContactCTA from '@/components/ContactCTA';
-import VisitorCounter from '@/components/VisitorCounter';
 import { portfolioData } from '@/data/portfolio-data';
 
 export default function Home() {
@@ -79,7 +78,6 @@ export default function Home() {
       </section>
 
       <ContactCTA />
-      <VisitorCounter />
 
       <footer className="border-t border-rule-2 bg-ground">
         <div className="mx-auto flex max-w-6xl flex-col items-start gap-4 px-6 py-10 sm:flex-row sm:items-center sm:justify-between sm:px-10">
