@@ -18,7 +18,7 @@ const splineMono = Spline_Sans_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://eikphaibun.github.io/portforio";
+const SITE_URL = "https://portforio-beta.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
